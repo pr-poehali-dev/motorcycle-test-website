@@ -3,6 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Button } from '@/components/ui/button';
+import Icon from '@/components/ui/icon';
 import { Home } from './pages/Home';
 import { Quiz } from './pages/Quiz';
 import { Movies } from './pages/Movies';
