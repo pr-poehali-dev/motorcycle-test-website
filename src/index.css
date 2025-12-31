@@ -96,6 +96,66 @@
     --input: 0 0% 90%;
     --ring: 0 0% 40%;
   }
+
+  .newyear {
+    --background: 210 100% 97%;
+    --foreground: 215 25% 15%;
+
+    --card: 210 100% 99%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 210 100% 99%;
+    --popover-foreground: 215 25% 15%;
+
+    --primary: 215 85% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 50% 88%;
+    --secondary-foreground: 215 25% 15%;
+
+    --muted: 210 40% 92%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 200 85% 65%;
+    --accent-foreground: 215 25% 15%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 30% 85%;
+    --input: 210 40% 92%;
+    --ring: 215 85% 55%;
+  }
+
+  .purple {
+    --background: 265 30% 12%;
+    --foreground: 0 0% 100%;
+
+    --card: 265 30% 16%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 265 30% 16%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 270 60% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 265 30% 20%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 265 25% 20%;
+    --muted-foreground: 0 0% 64%;
+
+    --accent: 270 60% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 265 30% 24%;
+    --input: 265 30% 20%;
+    --ring: 270 60% 60%;
+  }
 }
 
 @layer base {

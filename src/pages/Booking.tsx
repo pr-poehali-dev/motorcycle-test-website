@@ -4,12 +4,22 @@ import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
 import type { Movie } from '../App';
+
+const ORDERS_URL = 'https://functions.poehali.dev/14c391f3-2004-4d80-93dd-b22e99377b74';
 
 type BookingProps = {
   movie: Movie | null;
   onBack: () => void;
+  user: any;
 };
 
 type Seat = {
@@ -42,10 +52,12 @@ const generateSeats = (): Seat[] => {
   return seats;
 };
 
-export function Booking({ movie, onBack }: BookingProps) {
+export function Booking({ movie, onBack, user }: BookingProps) {
   const [seats] = useState<Seat[]>(generateSeats());
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [orderDetails, setOrderDetails] = useState<any>(null);
 
   if (!movie) {
     return (
@@ -91,6 +103,43 @@ export function Booking({ movie, onBack }: BookingProps) {
       return sum + (product?.price || 0);
     }, 0);
     return ticketsTotal + productsTotal;
+  };
+
+  const handleBooking = async () => {
+    if (selectedSeats.length === 0) return;
+
+    const products = selectedProducts.map((productId) => {
+      const product = movie!.exclusiveProducts.find((p) => p.id === productId);
+      return product;
+    }).filter(Boolean);
+
+    try {
+      const response = await fetch(ORDERS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          movieId: movie!.id,
+          movieTitle: movie!.title,
+          seats: selectedSeats,
+          products,
+          ticketPrice: movie!.price
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setOrderDetails(data);
+        setShowSuccessDialog(true);
+        setSelectedSeats([]);
+        setSelectedProducts([]);
+      } else {
+        alert('Ошибка оформления заказа');
+      }
+    } catch (error) {
+      alert('Ошибка подключения к серверу');
+    }
   };
 
   return (
@@ -234,7 +283,7 @@ export function Booking({ movie, onBack }: BookingProps) {
               size="lg"
               className="w-full hover:scale-105 transition-transform"
               disabled={selectedSeats.length === 0}
-              onClick={() => alert(`Заказ оформлен! Билетов: ${selectedSeats.length}, Итого: ${calculateTotal()} ₽`)}
+              onClick={handleBooking}
             >
               <Icon name="ShoppingCart" className="mr-2" />
               Оформить заказ
@@ -248,6 +297,56 @@ export function Booking({ movie, onBack }: BookingProps) {
           </Card>
         </div>
       </div>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-3xl text-center mb-4">
+              <div className="text-6xl mb-4">🎉</div>
+              Билеты успешно куплены!
+            </DialogTitle>
+            <DialogDescription className="text-center space-y-6">
+              <div className="bg-accent p-6 rounded-lg">
+                <h3 className="text-xl font-bold text-foreground mb-3">Информация о сеансе</h3>
+                <div className="space-y-2 text-foreground">
+                  <p className="text-lg">
+                    <strong>Фильм:</strong> {movie?.title}
+                  </p>
+                  {orderDetails && (
+                    <p className="text-lg">
+                      <strong>Дата выхода фильма:</strong>{' '}
+                      <span className="text-primary font-bold">1 ноября 2026 года</span>
+                    </p>
+                  )}
+                  <p className="text-lg">
+                    <strong>Количество билетов:</strong> {selectedSeats.length || orderDetails?.ticketTotal / movie?.price}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary">
+                <p className="text-lg font-semibold text-foreground">
+                  ⏰ Сеанс скоро начнётся!
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Не забудьте прийти за 15 минут до начала
+                </p>
+              </div>
+
+              <Button
+                size="lg"
+                onClick={() => {
+                  setShowSuccessDialog(false);
+                  onBack();
+                }}
+                className="w-full"
+              >
+                Отлично!
+              </Button>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

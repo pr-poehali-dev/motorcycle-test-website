@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Get orders without userId",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

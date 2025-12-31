@@ -9,11 +9,14 @@ import { Movies } from './pages/Movies';
 import { Booking } from './pages/Booking';
 import { Reviews } from './pages/Reviews';
 import { Products } from './pages/Products';
+import { Snowflakes } from './components/Snowflakes';
+import { Auth } from './pages/Auth';
+import { Profile } from './pages/Profile';
 
 const queryClient = new QueryClient();
 
-type Theme = 'default' | 'dark' | 'light';
-type Page = 'home' | 'quiz' | 'movies' | 'booking' | 'reviews' | 'products';
+type Theme = 'default' | 'dark' | 'light' | 'newyear' | 'purple';
+type Page = 'home' | 'quiz' | 'movies' | 'booking' | 'reviews' | 'products' | 'auth' | 'profile';
 
 export type Movie = {
   id: number;
@@ -34,9 +37,17 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    document.documentElement.classList.remove('default', 'dark', 'light');
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.remove('default', 'dark', 'light', 'newyear', 'purple');
     document.documentElement.classList.add(theme);
   }, [theme]);
 
@@ -50,7 +61,22 @@ function AppContent() {
     setCurrentPage('booking');
   };
 
+  const handleLogin = (userData: any) => {
+    setUser(userData);
+    setCurrentPage('home');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    setCurrentPage('home');
+  };
+
   const renderPage = () => {
+    if (!user && currentPage === 'booking') {
+      return <Auth onLogin={handleLogin} />;
+    }
+
     switch (currentPage) {
       case 'home':
         return <Home onNavigate={setCurrentPage} />;
@@ -59,18 +85,23 @@ function AppContent() {
       case 'movies':
         return <Movies onMovieSelect={handleMovieSelect} quizCompleted={quizCompleted} />;
       case 'booking':
-        return <Booking movie={selectedMovie} onBack={() => setCurrentPage('movies')} />;
+        return <Booking movie={selectedMovie} onBack={() => setCurrentPage('movies')} user={user} />;
       case 'reviews':
         return <Reviews quizCompleted={quizCompleted} />;
       case 'products':
         return <Products />;
+      case 'auth':
+        return <Auth onLogin={handleLogin} />;
+      case 'profile':
+        return <Profile user={user} onUpdate={setUser} onLogout={handleLogout} />;
       default:
         return <Home onNavigate={setCurrentPage} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground relative">
+      {theme === 'newyear' && <Snowflakes />}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-card border-b border-border backdrop-blur-lg bg-opacity-90">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -114,6 +145,25 @@ function AppContent() {
                 Отзывы
               </button>
 
+              {user ? (
+                <Button
+                  variant="ghost"
+                  onClick={() => setCurrentPage('profile')}
+                  className="ml-4"
+                >
+                  <Icon name="User" className="mr-2" />
+                  {user.display_name || user.displayName}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => setCurrentPage('auth')}
+                  className="ml-4"
+                >
+                  <Icon name="LogIn" className="mr-2" />
+                  Войти
+                </Button>
+              )}
+
               <div className="flex gap-2 ml-4 border-l border-border pl-4">
                 <button
                   onClick={() => setTheme('default')}
@@ -142,13 +192,31 @@ function AppContent() {
                 >
                   ☀️
                 </button>
+                <button
+                  onClick={() => setTheme('newyear')}
+                  className={`px-3 py-1 rounded-md transition-all ${
+                    theme === 'newyear' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
+                  }`}
+                  title="Новогодняя тема"
+                >
+                  ❄️
+                </button>
+                <button
+                  onClick={() => setTheme('purple')}
+                  className={`px-3 py-1 rounded-md transition-all ${
+                    theme === 'purple' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
+                  }`}
+                  title="Фиолетовая тема"
+                >
+                  💜
+                </button>
               </div>
             </div>
           </div>
         </div>
       </nav>
 
-      <main className="pt-20">
+      <main className="pt-20 relative z-10">
         {renderPage()}
       </main>
     </div>

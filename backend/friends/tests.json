@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Get friends without userId",
+      "method": "GET",
+      "path": "/?action=friends",
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
